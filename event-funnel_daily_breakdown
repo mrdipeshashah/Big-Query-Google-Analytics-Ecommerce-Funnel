@@ -25,6 +25,7 @@ SELECT
   COUNTIF(event_name = 'view_item_list') AS view_item_list,
   COUNTIF(event_name = 'select_item') AS product_click,
   COUNTIF(event_name = 'view_item') AS view_item,
+  COUNTIF(event_name = 'view_cart') AS view_cart,
   COUNTIF(event_name = 'add_to_cart') AS add_to_cart,
   COUNTIF(event_name = 'remove_from_cart') AS remove_from_cart,
   COUNTIF(event_name = 'begin_checkout') AS begin_checkout,
@@ -34,12 +35,12 @@ SELECT
   SUM(COALESCE(i.quantity, 1)) AS total_quantity,
   SUM(COALESCE(i.item_revenue, 0)) AS total_revenue
 
-FROM `enter.tablename_123456.events_*`,
+FROM `mrdipeshashah.analytics_343520795.events_*`, 
 UNNEST(items) AS i
 
-WHERE _TABLE_SUFFIX BETWEEN '20260101' AND '20260131'
+WHERE _TABLE_SUFFIX BETWEEN '20260101' AND '20260731'
   AND event_name IN (
-    'view_item_list', 'select_item', 'view_item', 
+    'view_item_list', 'select_item', 'view_item', 'view_cart'
     'add_to_cart', 'remove_from_cart', 'begin_checkout', 'purchase'
   )
 
