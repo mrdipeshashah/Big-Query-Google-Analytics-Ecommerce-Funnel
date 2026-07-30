@@ -1,8 +1,6 @@
 SELECT
-  -- 1. Display format for Dashboard
+  -- Month-Year Dimensions
   FORMAT_DATE('%B-%y', PARSE_DATE('%Y%m%d', event_date)) AS month_year,
-  
-  -- 2. Hidden date column for perfect chronological sorting
   DATE_TRUNC(PARSE_DATE('%Y%m%d', event_date), MONTH) AS month_sort,
 
   -- Product Identifiers
@@ -13,13 +11,17 @@ SELECT
   (SELECT value.string_value FROM UNNEST(i.item_params) WHERE key = 'sku') AS sku,
   (SELECT value.string_value FROM UNNEST(i.item_params) WHERE key = 'stockstatus') AS stockstatus,
 
-  -- Funnel Metrics
+  -- Monthly Funnel Counts
   COUNTIF(event_name = 'view_item') AS view_item_count,
   COUNTIF(event_name = 'add_to_cart') AS add_to_cart_count,
   COUNTIF(event_name = 'begin_checkout') AS begin_checkout_count,
   COUNTIF(event_name = 'purchase') AS purchase_count,
 
-  -- Abandonment Calculations
+  -- Realized Revenue & Quantities
+  SUM(IF(event_name = 'purchase', COALESCE(i.quantity, 1), 0)) AS purchased_units,
+  SUM(COALESCE(i.item_revenue, 0)) AS total_revenue,
+
+  -- Abandonment & Lost Value Metrics
   GREATEST(COUNTIF(event_name = 'add_to_cart') - COUNTIF(event_name = 'purchase'), 0) AS abandoned_units,
   GREATEST(COUNTIF(event_name = 'add_to_cart') - COUNTIF(event_name = 'purchase'), 0) * i.price AS gross_lost_revenue,
   GREATEST(COUNTIF(event_name = 'begin_checkout') - COUNTIF(event_name = 'purchase'), 0) * i.price AS checkout_lost_revenue
@@ -31,5 +33,4 @@ WHERE _TABLE_SUFFIX BETWEEN '20260101' AND '20260731'
   AND event_name IN ('view_item', 'add_to_cart', 'begin_checkout', 'purchase')
 
 GROUP BY 1, 2, 3, 4, 5, 6, 7, 8
--- Sort chronologically by true date first, then highest lost revenue
 ORDER BY month_sort DESC, gross_lost_revenue DESC
