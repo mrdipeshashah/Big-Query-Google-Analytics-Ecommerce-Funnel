@@ -18,10 +18,11 @@ SELECT
   (SELECT value.string_value FROM UNNEST(i.item_params) WHERE key = 'stockstatus') AS stockstatus,
   (SELECT value.string_value FROM UNNEST(i.item_params) WHERE key = 'product_type') AS product_type,
 
-  -- Event / Currency Detail
+  -- Event, Device & Currency Detail
   (SELECT value.string_value FROM UNNEST(event_params) WHERE key = 'currency') AS currency,
+  device.category AS device_category,
 
-  -- Funnel Event Counts
+  -- Funnel Event Counts (Ordered chronologically)
   COUNTIF(event_name = 'view_item_list') AS view_item_list,
   COUNTIF(event_name = 'select_item') AS product_click,
   COUNTIF(event_name = 'view_item') AS view_item,
@@ -40,9 +41,10 @@ UNNEST(items) AS i
 
 WHERE _TABLE_SUFFIX BETWEEN '20250101' AND '20260731'  -- Adjust date range as needed
   AND event_name IN (
-    'view_item_list', 'select_item', 'view_item','view_cart'
-    'add_to_cart', 'remove_from_cart', 'begin_checkout', 'purchase'
+    'view_item_list', 'select_item', 'view_item',
+    'add_to_cart', 'view_cart', 'remove_from_cart', 
+    'begin_checkout', 'purchase'
   )
 
-GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12
+GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13
 ORDER BY total_revenue DESC
