@@ -1,0 +1,54 @@
+WITH view_cart_items AS (
+  SELECT
+    i.item_id,
+    i.item_name,
+    i.item_category,
+    SUM(i.quantity) AS cart_units,
+    SUM(i.quantity * i.price) AS cart_value
+  FROM `your_project.analytics_xxxx.events_*`,
+  UNNEST(items) AS i
+  WHERE event_name = 'view_cart'
+    AND _TABLE_SUFFIX BETWEEN '20260701' AND '20260731' -- Adjust date range
+  GROUP BY 1, 2, 3
+),
+
+purchase_items AS (
+  SELECT
+    i.item_id,
+    i.item_name,
+    i.item_category,
+    SUM(i.quantity) AS purchased_units,
+    SUM(i.quantity * i.price) AS purchased_value
+  FROM `your_project.analytics_xxxx.events_*`,
+  UNNEST(items) AS i
+  WHERE event_name = 'purchase'
+    AND _TABLE_SUFFIX BETWEEN '20260701' AND '20260731' -- Adjust date range
+  GROUP BY 1, 2, 3
+)
+
+SELECT
+  COALESCE(c.item_id, p.item_id) AS item_id,
+  COALESCE(c.item_name, p.item_name) AS item_name,
+  COALESCE(c.item_category, p.item_category) AS item_category,
+  
+  -- Unit Dynamics
+  COALESCE(c.cart_units, 0) AS cart_units,
+  COALESCE(p.purchased_units, 0) AS purchased_units,
+  (COALESCE(p.purchased_units, 0) - COALESCE(c.cart_units, 0)) AS unit_delta,
+  
+  -- Value Dynamics (£)
+  COALESCE(c.cart_value, 0) AS cart_value,
+  COALESCE(p.purchased_value, 0) AS purchased_value,
+  (COALESCE(p.purchased_value, 0) - COALESCE(c.cart_value, 0)) AS value_delta,
+  
+  -- Behavior Label
+  CASE
+    WHEN COALESCE(p.purchased_units, 0) > COALESCE(c.cart_units, 0) THEN 'Quantity Expanded'
+    WHEN COALESCE(p.purchased_units, 0) < COALESCE(c.cart_units, 0) AND COALESCE(p.purchased_units, 0) > 0 THEN 'Quantity Trimmed'
+    WHEN COALESCE(p.purchased_units, 0) = 0 THEN 'Item Removed/Abandoned'
+    ELSE 'Unchanged'
+  END AS cart_behavior_type
+
+FROM view_cart_items c
+FULL OUTER JOIN purchase_items p 
+  ON c.item_id = p.item_id;
