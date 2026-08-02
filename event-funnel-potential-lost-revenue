@@ -1,58 +1,40 @@
-WITH view_cart_items AS (
-  SELECT
-    PARSE_DATE('%Y%m%d', event_date) AS event_date,
-    i.item_id,
-    i.item_name,
-    i.item_category,
-    SUM(i.quantity) AS cart_units,
-    SUM(i.quantity * i.price) AS cart_value
-  FROM `your_project.analytics_xxxx.events_*`,
-  UNNEST(items) AS i
-  WHERE event_name = 'view_cart'
-    AND _TABLE_SUFFIX BETWEEN '20260701' AND '20260731' -- Adjust date range
-  GROUP BY 1, 2, 3, 4
-),
-
-purchase_items AS (
-  SELECT
-    PARSE_DATE('%Y%m%d', event_date) AS event_date,
-    i.item_id,
-    i.item_name,
-    i.item_category,
-    SUM(i.quantity) AS purchased_units,
-    SUM(i.quantity * i.price) AS purchased_value
-  FROM `your_project.analytics_xxxx.events_*`,
-  UNNEST(items) AS i
-  WHERE event_name = 'purchase'
-    AND _TABLE_SUFFIX BETWEEN '20260701' AND '20260731' -- Adjust date range
-  GROUP BY 1, 2, 3, 4
-)
-
 SELECT
-  COALESCE(c.event_date, p.event_date) AS event_date,
-  COALESCE(c.item_id, p.item_id) AS item_id,
-  COALESCE(c.item_name, p.item_name) AS item_name,
-  COALESCE(c.item_category, p.item_category) AS item_category,
-  
-  -- Unit Dynamics
-  COALESCE(c.cart_units, 0) AS cart_units,
-  COALESCE(p.purchased_units, 0) AS purchased_units,
-  (COALESCE(p.purchased_units, 0) - COALESCE(c.cart_units, 0)) AS unit_delta,
-  
-  -- Value Dynamics (£)
-  COALESCE(c.cart_value, 0) AS cart_value,
-  COALESCE(p.purchased_value, 0) AS purchased_value,
-  (COALESCE(p.purchased_value, 0) - COALESCE(c.cart_value, 0)) AS value_delta,
-  
-  -- Behavior Label
-  CASE
-    WHEN COALESCE(p.purchased_units, 0) > COALESCE(c.cart_units, 0) THEN 'Quantity Expanded'
-    WHEN COALESCE(p.purchased_units, 0) < COALESCE(c.cart_units, 0) AND COALESCE(p.purchased_units, 0) > 0 THEN 'Quantity Trimmed'
-    WHEN COALESCE(p.purchased_units, 0) = 0 THEN 'Item Removed/Abandoned'
-    ELSE 'Unchanged'
-  END AS cart_behavior_type
+  -- Daily Date Dimension (Crucial for Daily Spikes & Time-Series)
+  PARSE_DATE('%Y%m%d', event_date) AS event_date,
 
-FROM view_cart_items c
-FULL OUTER JOIN purchase_items p 
-  ON c.event_date = p.event_date
-  AND c.item_id = p.item_id;
+  -- Month-Year Dimensions (Retained for Easy Monthly Filtering)
+  FORMAT_DATE('%B-%Y', PARSE_DATE('%Y%m%d', event_date)) AS month_year,
+  DATE_TRUNC(PARSE_DATE('%Y%m%d', event_date), MONTH) AS month_sort,
+
+  -- Product Identifiers
+  i.item_id,
+  i.item_name,
+  i.item_category,
+  i.price,
+  (SELECT value.string_value FROM UNNEST(i.item_params) WHERE key = 'sku') AS sku,
+  (SELECT value.string_value FROM UNNEST(i.item_params) WHERE key = 'stockstatus') AS stockstatus,
+
+  -- Daily Funnel Counts
+  COUNTIF(event_name = 'view_item') AS view_item_count,
+  COUNTIF(event_name = 'add_to_cart') AS add_to_cart_count,
+  COUNTIF(event_name = 'begin_checkout') AS begin_checkout_count,
+  COUNTIF(event_name = 'purchase') AS purchase_count,
+
+  -- Realized Revenue & Quantities
+  SUM(IF(event_name = 'purchase', COALESCE(i.quantity, 1), 0)) AS purchased_units,
+  SUM(COALESCE(i.item_revenue, 0)) AS total_revenue,
+
+  -- Abandonment & Lost Value Metrics
+  GREATEST(COUNTIF(event_name = 'add_to_cart') - COUNTIF(event_name = 'purchase'), 0) AS abandoned_units,
+  GREATEST(COUNTIF(event_name = 'add_to_cart') - COUNTIF(event_name = 'purchase'), 0) * i.price AS gross_lost_revenue,
+  GREATEST(COUNTIF(event_name = 'begin_checkout') - COUNTIF(event_name = 'purchase'), 0) * i.price AS checkout_lost_revenue
+
+FROM `mrdipeshashah.analytics_343520795.events_*`,
+UNNEST(items) AS i
+
+WHERE _TABLE_SUFFIX BETWEEN '20260101' AND '20260831'
+  AND event_name IN ('view_item', 'add_to_cart', 'begin_checkout', 'purchase')
+
+-- Updated GROUP BY to include event_date (Column 1)
+GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9
+ORDER BY event_date DESC, gross_lost_revenue DESC
