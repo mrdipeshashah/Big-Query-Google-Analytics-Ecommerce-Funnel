@@ -17,20 +17,19 @@ SELECT
   item_id,
   item_name,
   stock_status,
+  price, -- Exposing price so Looker Studio calculated fields work!
 
   -- Core Funnel Metrics
   COUNTIF(event_name = 'view_item') AS pdp_views,
   COUNTIF(event_name = 'add_to_cart') AS add_to_cart_count,
   COUNTIF(event_name = 'purchase') AS purchase_count,
   
-  -- Financial Performance
+  -- Realized Revenue
   SUM(IF(event_name = 'purchase', item_revenue, 0)) AS realized_revenue,
   
-  -- Option A: Raw Traffic Demand Ceiling (100% of out-of-stock view value)
+  -- Pre-calculated Out-Of-Stock Loss Metrics (No Looker Studio Calcs Needed for These Two)
   SUM(IF(stock_status = 'outofstock' AND event_name = 'view_item', price, 0)) AS max_unmet_demand_ceiling,
-
-  -- Option B: Realistic Lost Revenue Estimate (Discounted by 2.5% baseline CVR)
   SUM(IF(stock_status = 'outofstock' AND event_name = 'view_item', price * 0.025, 0)) AS est_lost_revenue_stockouts
 
 FROM prepped_events
-GROUP BY 1, 2, 3, 4;
+GROUP BY 1, 2, 3, 4, 5;
