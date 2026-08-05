@@ -1,21 +1,21 @@
-## 📁 Repository SQL Scripts Breakdown
+# 📁 Repository SQL Scripts Breakdown
 
-The repository consists of **4 core SQL scripts** organized into a 3-page Looker Studio dashboard structure:
+The repository consists of core SQL scripts in BigQuery organized to power a **4-page Looker Studio Analytics Dashboard**:
 
-1. **`01_funnel_daily_summary.sql`** $\rightarrow$ Powers **Page 1: Conversion Funnel & Operational Diagnostics**
-2. **`02_cart_leakage_analysis.sql`** $\rightarrow$ Powers **Page 2: Cart Abandonment & Revenue Leakage**
-3. **`03_cart_to_purchase_changes.sql`** $\rightarrow$ Powers **Page 3: Basket Behavior & Cart Quantity Dynamics (Core Engine)**
-4. **`04_cart_to_purchase_daily_summary.sql`** $\rightarrow$ Powers **Page 3: Daily Time-Series & Trend Aggregations**
+1. **`event-funnel-daily-breakdown`** $\rightarrow$ Powers **Page 1: Conversion Funnel & Operational Performance**
+2. **`event-funnel-potential-lost-revenue`** $\rightarrow$ Powers **Page 2: Abandonment & Leakage Analysis**
+3. **`event-funnel-demand-ceiling`** $\rightarrow$ Powers **Page 3: Inventory & Merchandising Friction**
+4. **`event-funnel-cart-to-purchase-changes`** $\rightarrow$ Powers **Page 4: Basket Behavior & Cart Quantity Dynamics**
 
 ---
 
-# 📄 Page 1: Conversion Funnel & Operational Diagnostics
+# 📄 Page 1: Conversion Funnel & Operational Performance
 
 ### Objective
 Tracks daily micro-conversions and step-by-step user movement down the primary ecommerce purchasing funnel:
 `Item View` $\rightarrow$ `Add to Cart` $\rightarrow$ `View Cart` $\rightarrow$ `Begin Checkout` $\rightarrow$ `Purchase`.
 
-### Data Source SQL: `01_funnel_daily_summary.sql`
+### Data Source SQL: `event-funnel-daily-breakdown`
 
 ### 🧮 Comprehensive Calculation Matrix (Page 1)
 
@@ -31,12 +31,12 @@ Tracks daily micro-conversions and step-by-step user movement down the primary e
 
 ---
 
-# 📄 Page 2: Cart Abandonment & Revenue Leakage Analysis
+# 📄 Page 2: Abandonment & Leakage Analysis
 
 ### Objective
-Isolates financial drop-offs occurring specifically after cart creation, distinguishing between broad cart abandonment and high-intent checkout abandonments.
+Isolates financial drop-offs occurring specifically across the funnel, evaluating user conversion windows to identify true cart abandonment vs. checkout leakage.
 
-### Data Source SQL: `02_cart_leakage_analysis.sql`
+### Data Source SQL: `event-funnel-potential-lost-revenue`
 
 ### 🧮 Comprehensive Calculation Matrix (Page 2)
 
@@ -50,14 +50,33 @@ Isolates financial drop-offs occurring specifically after cart creation, disting
 
 ---
 
-# 📄 Page 3: Basket Dynamics & Cart Quantity Modifications
+# 📄 Page 3: Inventory & Merchandising Friction
 
 ### Objective
-Analyzes item-level quantity mutability between initial cart viewing (`view_cart`) and final order completion (`purchase`). It pinpoints products where customers expand unit volumes vs. items trimmed due to price sensitivity.
+Evaluates supply-chain and stock friction by diagnosing **in-stock cart abandonment** against **out-of-stock demand ceiling potential**, enabling merchandise buyers to prioritize restocks based on actual user traffic.
 
-### Data Source SQL: `03_cart_to_purchase_changes.sql` & `04_cart_to_purchase_daily_summary.sql`
+### Data Source SQL: `event-funnel-demand-ceiling`
 
 ### 🧮 Comprehensive Calculation Matrix (Page 3)
+
+| Metric / Calculated Field | SQL / Looker Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
+| :--- | :--- | :--- | :--- | :--- |
+| **Gross Lost Revenue (In-Stock)** | `SUM(IF(stock_status != 'outofstock', Abandoned Units * price, 0))` | Currency (`£`) | Total abandoned cart value exclusively for products currently in stock. | High-intent cart leakage that can be directly recovered via CRO/email flows. |
+| **Unmet Demand Ceiling (Out-of-Stock)** | `SUM(IF(stock_status = 'outofstock', pdp_views * price, 0))` | Currency (`£`) | Total item value exposure across all PDP views on out-of-stock items (`Views × Price`). | Top-of-funnel merchandising ceiling indicating lost revenue potential due to stockouts. |
+| **Realized Revenue** | `SUM(IF(event_name = 'purchase', item_revenue, 0))` | Currency (`£`) | Sum of completed order item revenue captured during the selected period. | Actual sales baseline used to compare realized dollars against lost cart potential. |
+| **Abandoned Units** | `GREATEST(0, add_to_cart_count - purchase_count)` | Integer | Subtracts converted units from total carted units per item/date grain. | Physical unit count added to cart but left unpurchased. |
+| **Cart Abandonment Rate %** | `SUM(Abandoned Units) / NULLIF(SUM(add_to_cart_count), 0)` | Percentage | Ratio of unpurchased carted items against total cart additions. | Item-level friction metric identifying products with high cart drop-off rates. |
+
+---
+
+# 📄 Page 4: Basket Behavior & Cart Quantity Dynamics
+
+### Objective
+Analyzes item-level quantity mutability between initial cart creation (`view_cart`) and final order completion (`purchase`), pinpointing items where shoppers expand quantities vs. items trimmed due to price thresholds.
+
+### Data Source SQL: `event-funnel-cart-to-purchase-changes`
+
+### 🧮 Comprehensive Calculation Matrix (Page 4)
 
 | Metric / Calculated Field | SQL / Looker Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
 | :--- | :--- | :--- | :--- | :--- |
