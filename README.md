@@ -9,6 +9,36 @@ The repository consists of core SQL scripts in BigQuery organized to power a **4
 
 ---
 
+# ⚡ Key Metrics Overview & Executive Context
+
+Before diving into page-level technical specifications, this section provides an immediate reference for the core financial and conversion metrics tracked across the analytics suite:
+
+### 1. Gross Lost Revenue (In-Stock) (£)
+* **What it is:** The sum of all abandoned cart item values for products that are **currently in stock**.
+* **Business Context:** Represents high-intent, recoverable revenue. Because the inventory is physically available to fulfill, this metric highlights friction in pricing, UX, or exit intent that can be directly captured through CRO optimizations and automated cart-recovery workflows.
+
+### 2. Unmet Demand Ceiling (Out-of-Stock) (£)
+* **What it is:** The total potential monetary demand exposure captured on products that are **out of stock** ($\text{PDP Views} \times \text{Item Price}$).
+* **Business Context:** Measures unrecoverable lost revenue caused strictly by supply constraints rather than website performance. Merchandising and purchasing teams use this figure to quantify lost revenue and prioritize vendor restocks based on real user interest.
+
+### 3. Combined Revenue Lost (£)
+* **What it is:** The macro sum of all potential cart-stage and checkout-stage drop-off values ($\text{Cart-Stage Lost Revenue} + \text{Checkout Lost Revenue}$).
+* **Business Context:** Establishes the top-line "revenue recovery opportunity." It tells executives the total dollar value sitting in non-converting baskets across the entire purchasing journey.
+
+### 4. Cart-Stage Lost Revenue (£)
+* **What it is:** Potential revenue lost from users who added items to their cart but **never clicked "Begin Checkout."**
+* **Business Context:** Pinpoints top-of-funnel hesitation. High values indicate issues like sudden shipping fee estimates on product pages, lack of trust signals, or an ineffective abandoned cart email flow.
+
+### 5. Checkout Lost Revenue (£)
+* **What it is:** Potential revenue lost from high-intent users who **started the checkout process** but failed to complete the purchase.
+* **Business Context:** Pinpoints bottom-of-funnel conversion leakage. High values alert technical teams to payment gateway errors, overly complex checkout forms, or missing local payment methods.
+
+### 6. Net Unit & Value Shift (`unit_delta` / `value_delta`)
+* **What it is:** The net change between physical units initially added to carts versus final units successfully purchased.
+* **Business Context:** Identifies basket modification dynamics. Positive shifts reveal successful cross-selling and bundling, while negative shifts highlight pricing threshold friction where shoppers actively trim items prior to payment.
+
+---
+
 # 📄 Page 1: Conversion Funnel & Operational Performance
 
 ### Objective
