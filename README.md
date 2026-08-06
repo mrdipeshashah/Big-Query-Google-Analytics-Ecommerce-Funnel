@@ -37,6 +37,10 @@ Before diving into page-level technical specifications, this section provides an
 * **What it is:** The net change between physical units initially added to carts versus final units successfully purchased.
 * **Business Context:** Identifies basket modification dynamics. Positive shifts reveal successful cross-selling and bundling, while negative shifts highlight pricing threshold friction where shoppers actively trim items prior to payment.
 
+### 7. Actual Revenue (£)
+* **What it is:** The sum of actual item revenue captured from completed purchase events (`event_name = 'purchase'`).
+* **Business Context:** Represents actual sales made (cash in the bank). Used across the dashboard as the baseline to evaluate "Actual Revenue vs. Potential/Lost Revenue," showing how much cash was captured compared to what was left in abandoned carts.
+
 ---
 
 # 📄 Page 1: Conversion Funnel & Operational Performance
@@ -94,7 +98,7 @@ Evaluates supply-chain and stock friction by diagnosing **in-stock cart abandonm
 | :--- | :--- | :--- | :--- | :--- |
 | **Gross Lost Revenue (In-Stock)** | `SUM(IF(stock_status != 'outofstock', Abandoned Units * price, 0))` | Currency (`£`) | Total abandoned cart value exclusively for products currently in stock. | High-intent cart leakage that can be directly recovered via CRO/email flows. |
 | **Unmet Demand Ceiling (Out-of-Stock)** | `SUM(IF(stock_status = 'outofstock', pdp_views * price, 0))` | Currency (`£`) | Total item value exposure across all PDP views on out-of-stock items (`Views × Price`). | Top-of-funnel merchandising ceiling indicating lost revenue potential due to stockouts. |
-| **Realized Revenue** | `SUM(IF(event_name = 'purchase', item_revenue, 0))` | Currency (`£`) | Sum of completed order item revenue captured during the selected period. | Actual sales baseline used to compare realized dollars against lost cart potential. |
+| **Actual Revenue** | `SUM(IF(event_name = 'purchase', item_revenue, 0))` | Currency (`£`) | Sum of completed order item revenue captured during the selected period. | Actual sales baseline used to compare realized dollars against lost cart potential. |
 | **Abandoned Units** | `GREATEST(0, add_to_cart_count - purchase_count)` | Integer | Subtracts converted units from total carted units per item/date grain. | Physical unit count added to cart but left unpurchased. |
 | **Cart Abandonment Rate %** | `SUM(Abandoned Units) / NULLIF(SUM(add_to_cart_count), 0)` | Percentage | Ratio of unpurchased carted items against total cart additions. | Item-level friction metric identifying products with high cart drop-off rates. |
 
