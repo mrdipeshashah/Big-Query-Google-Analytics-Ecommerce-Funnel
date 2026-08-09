@@ -1,32 +1,41 @@
-WITH view_cart_items AS (
+WITH cart_intent_items AS (
   SELECT
+    PARSE_DATE('%Y%m%d', event_date) AS event_date,
     i.item_id,
     i.item_name,
     i.item_category,
-    SUM(i.quantity) AS cart_units,
-    SUM(i.quantity * i.price) AS cart_value
-  FROM `your_project.analytics_xxxx.events_*`,
+    -- Compute true net units intended in cart (additions minus removals)
+    GREATEST(0, 
+      SUM(IF(event_name = 'add_to_cart', COALESCE(i.quantity, 1), 0)) - 
+      SUM(IF(event_name = 'remove_from_cart', COALESCE(i.quantity, 1), 0))
+    ) AS cart_units,
+    -- Calculate net cart value using item price
+    GREATEST(0, 
+      SUM(IF(event_name = 'add_to_cart', COALESCE(i.quantity, 1), 0)) - 
+      SUM(IF(event_name = 'remove_from_cart', COALESCE(i.quantity, 1), 0))
+    ) * MAX(i.price) AS cart_value
+  FROM `mrdipeshashah.analytics_343520795.events_*`,
   UNNEST(items) AS i
-  WHERE event_name = 'view_cart'
-    AND _TABLE_SUFFIX BETWEEN '20260701' AND '20260731' -- Adjust date range
-  GROUP BY 1, 2, 3
+  WHERE event_name IN ('add_to_cart', 'remove_from_cart', 'view_cart')
+  GROUP BY 1, 2, 3, 4
 ),
 
 purchase_items AS (
   SELECT
+    PARSE_DATE('%Y%m%d', event_date) AS event_date,
     i.item_id,
     i.item_name,
     i.item_category,
-    SUM(i.quantity) AS purchased_units,
-    SUM(i.quantity * i.price) AS purchased_value
-  FROM `your_project.analytics_xxxx.events_*`,
+    SUM(COALESCE(i.quantity, 1)) AS purchased_units,
+    SUM(COALESCE(i.item_revenue, COALESCE(i.quantity, 1) * i.price)) AS purchased_value
+  FROM `mrdipeshashah.analytics_343520795.events_*`,
   UNNEST(items) AS i
   WHERE event_name = 'purchase'
-    AND _TABLE_SUFFIX BETWEEN '20260701' AND '20260731' -- Adjust date range
-  GROUP BY 1, 2, 3
+  GROUP BY 1, 2, 3, 4
 )
 
 SELECT
+  COALESCE(c.event_date, p.event_date) AS event_date,
   COALESCE(c.item_id, p.item_id) AS item_id,
   COALESCE(c.item_name, p.item_name) AS item_name,
   COALESCE(c.item_category, p.item_category) AS item_category,
@@ -49,6 +58,7 @@ SELECT
     ELSE 'Unchanged'
   END AS cart_behavior_type
 
-FROM view_cart_items c
+FROM cart_intent_items c
 FULL OUTER JOIN purchase_items p 
-  ON c.item_id = p.item_id;
+  ON c.event_date = p.event_date
+  AND c.item_id = p.item_id;
