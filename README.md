@@ -70,6 +70,11 @@ Tracks daily micro-conversions and step-by-step user movement down the primary e
 ### Objective
 Isolates financial drop-offs occurring specifically across the funnel, evaluating user conversion windows to identify true cart abandonment vs. checkout leakage.
 
+> 📌 **Data Architecture & Attribution Note:**
+> * **Net Cart State Accounting:** To prevent inflated abandonment metrics, the underlying SQL computes each item's net cart volume by offsetting `remove_from_cart` events against `add_to_cart` events before evaluating lost revenue.
+> * **Stage Separation:** `Cart-Stage Lost Revenue` explicitly excludes items that progressed to `begin_checkout`, ensuring zero double-counting between mid-funnel cart drop-offs and late-stage checkout friction.
+> * **Time & Lookback Windowing:** User cart edits and purchases are evaluated within the active reporting window (recommended default: **30 Days**). This allows multi-day customer consideration journeys (e.g., carting on Monday, purchasing on Friday) to properly reconcile within the reporting period.
+
 ### Data Source SQL: `event-funnel-potential-lost-revenue`
 
 ### 🧮 Comprehensive Calculation Matrix (Page 2)
@@ -108,6 +113,15 @@ Evaluates supply-chain and stock friction by diagnosing **in-stock cart abandonm
 
 ### Objective
 Analyzes item-level quantity mutability between initial cart creation (`view_cart`) and final order completion (`purchase`), pinpointing items where shoppers expand quantities vs. items trimmed due to price thresholds.
+
+> 📌 **Data Architecture & Attribution Note:**
+> * **Dynamic Basket Adjustments:** Evaluates true quantity mutability by comparing net cart additions (`add_to_cart` minus `remove_from_cart`) against completed `purchase` quantities at the item-and-date grain.
+> * **Behavior Categorization Logic:** Automatically tags user basket interactions into explicit segments:
+>   * **Quantity Expanded:** Converted unit count exceeds initial carted units (upselling/bundling success).
+>   * **Quantity Trimmed:** Converted unit count is greater than zero but less than initial carted units (price threshold friction).
+>   * **Item Removed/Abandoned:** Converted unit count equals zero.
+>   * **Unchanged:** Perfect 1:1 unit retention from cart to purchase.
+> * **Attribution Horizon:** Captures quantity shifts across multi-session shopping journeys, eliminating false "negative expansion" spikes caused by unadjusted cart views.
 
 ### Data Source SQL: `event-funnel-cart-to-purchase-changes`
 
