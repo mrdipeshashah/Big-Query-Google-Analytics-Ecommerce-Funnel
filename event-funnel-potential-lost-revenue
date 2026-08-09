@@ -1,40 +1,64 @@
+WITH item_events AS (
+  SELECT
+    PARSE_DATE('%Y%m%d', event_date) AS event_date,
+    FORMAT_DATE('%B-%Y', PARSE_DATE('%Y%m%d', event_date)) AS month_year,
+    DATE_TRUNC(PARSE_DATE('%Y%m%d', event_date), MONTH) AS month_sort,
+    i.item_id,
+    i.item_name,
+    i.item_category,
+    i.price,
+    (SELECT value.string_value FROM UNNEST(i.item_params) WHERE key = 'sku') AS sku,
+    (SELECT value.string_value FROM UNNEST(i.item_params) WHERE key = 'stockstatus') AS stockstatus,
+    
+    -- Funnel Event Tracking
+    COUNTIF(event_name = 'view_item') AS view_item_count,
+    COUNTIF(event_name = 'add_to_cart') AS add_to_cart_count,
+    COUNTIF(event_name = 'remove_from_cart') AS remove_from_cart_count,
+    COUNTIF(event_name = 'begin_checkout') AS begin_checkout_count,
+    COUNTIF(event_name = 'purchase') AS purchase_count,
+
+    -- Quantities & Revenue
+    SUM(IF(event_name = 'add_to_cart', COALESCE(i.quantity, 1), 0)) AS added_units,
+    SUM(IF(event_name = 'remove_from_cart', COALESCE(i.quantity, 1), 0)) AS removed_units,
+    SUM(IF(event_name = 'begin_checkout', COALESCE(i.quantity, 1), 0)) AS checkout_units,
+    SUM(IF(event_name = 'purchase', COALESCE(i.quantity, 1), 0)) AS purchased_units,
+    SUM(COALESCE(i.item_revenue, 0)) AS total_revenue
+
+  FROM `mrdipeshashah.analytics_343520795.events_*`,
+  UNNEST(items) AS i
+  WHERE event_name IN ('view_item', 'add_to_cart', 'remove_from_cart', 'begin_checkout', 'purchase')
+  GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9
+)
+
 SELECT
-  -- Daily Date Dimension (Crucial for Daily Spikes & Time-Series)
-  PARSE_DATE('%Y%m%d', event_date) AS event_date,
-
-  -- Month-Year Dimensions (Retained for Easy Monthly Filtering)
-  FORMAT_DATE('%B-%Y', PARSE_DATE('%Y%m%d', event_date)) AS month_year,
-  DATE_TRUNC(PARSE_DATE('%Y%m%d', event_date), MONTH) AS month_sort,
-
-  -- Product Identifiers
-  i.item_id,
-  i.item_name,
-  i.item_category,
-  i.price,
-  (SELECT value.string_value FROM UNNEST(i.item_params) WHERE key = 'sku') AS sku,
-  (SELECT value.string_value FROM UNNEST(i.item_params) WHERE key = 'stockstatus') AS stockstatus,
+  event_date,
+  month_year,
+  month_sort,
+  item_id,
+  item_name,
+  item_category,
+  price,
+  sku,
+  stockstatus,
 
   -- Daily Funnel Counts
-  COUNTIF(event_name = 'view_item') AS view_item_count,
-  COUNTIF(event_name = 'add_to_cart') AS add_to_cart_count,
-  COUNTIF(event_name = 'begin_checkout') AS begin_checkout_count,
-  COUNTIF(event_name = 'purchase') AS purchase_count,
+  view_item_count,
+  add_to_cart_count,
+  begin_checkout_count,
+  purchase_count,
 
   -- Realized Revenue & Quantities
-  SUM(IF(event_name = 'purchase', COALESCE(i.quantity, 1), 0)) AS purchased_units,
-  SUM(COALESCE(i.item_revenue, 0)) AS total_revenue,
+  purchased_units,
+  total_revenue,
 
-  -- Abandonment & Lost Value Metrics
-  GREATEST(COUNTIF(event_name = 'add_to_cart') - COUNTIF(event_name = 'purchase'), 0) AS abandoned_units,
-  GREATEST(COUNTIF(event_name = 'add_to_cart') - COUNTIF(event_name = 'purchase'), 0) * i.price AS gross_lost_revenue,
-  GREATEST(COUNTIF(event_name = 'begin_checkout') - COUNTIF(event_name = 'purchase'), 0) * i.price AS checkout_lost_revenue
+  -- Net Abandoned Units (Adjusted for Removals)
+  GREATEST(added_units - removed_units - purchased_units, 0) AS abandoned_units,
 
-FROM `mrdipeshashah.analytics_343520795.events_*`,
-UNNEST(items) AS i
+  -- Cart-Stage Lost Revenue: Net items added minus items that entered checkout/purchased
+  GREATEST(added_units - removed_units - GREATEST(checkout_units, purchased_units), 0) * price AS gross_lost_revenue,
 
-WHERE _TABLE_SUFFIX BETWEEN '20260101' AND '20260831'
-  AND event_name IN ('view_item', 'add_to_cart', 'begin_checkout', 'purchase')
+  -- Checkout Lost Revenue: Items that entered checkout but were not purchased
+  GREATEST(checkout_units - purchased_units, 0) * price AS checkout_lost_revenue
 
--- Updated GROUP BY to include event_date (Column 1)
-GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9
-ORDER BY event_date DESC, gross_lost_revenue DESC
+FROM item_events
+ORDER BY event_date DESC, gross_lost_revenue DESC;
