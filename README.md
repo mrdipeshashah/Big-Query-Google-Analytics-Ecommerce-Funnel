@@ -1,4 +1,4 @@
-# 📁 Repository SQL Scripts Breakdown
+# Repository SQL Scripts Breakdown
 
 The repository consists of core SQL scripts in BigQuery organized to power a **4-page Looker Studio Analytics Dashboard**:
 
