@@ -9,7 +9,7 @@ The repository consists of core SQL scripts in BigQuery organized to power a **4
 
 ---
 
-# ⚡ Key Metrics Overview & Executive Context
+# Key Metrics Overview & Executive Context
 
 Before diving into page-level technical specifications, this section provides an immediate reference for the core financial and conversion metrics tracked across the analytics suite:
 
@@ -55,7 +55,7 @@ To verify that the dataset accurately handles multi-session consideration cycles
 
 ---
 
-### 📊 Metric Reconciliation & Analytical Insights
+### Metric Reconciliation & Analytical Insights
 
 #### **Page 2: Leakage & Stage Separation Metrics**
 
@@ -81,7 +81,7 @@ To verify that the dataset accurately handles multi-session consideration cycles
 
 > **Why This Differs From Legacy Analytics:** Traditional GA4 reports only show initial cart views vs final purchases, completely missing mid-funnel quantity edits. This model explicitly highlights **Product B as a "Quantity Trimmed" item**, surfacing price threshold sensitivity where customers scale back quantity immediately before paying.
 
-# 📄 Page 1: Conversion Funnel & Operational Performance
+# Page 1: Conversion Funnel & Operational Performance
 
 ### Objective
 Tracks daily micro-conversions and step-by-step user movement down the primary ecommerce purchasing funnel:
@@ -89,7 +89,7 @@ Tracks daily micro-conversions and step-by-step user movement down the primary e
 
 ### Data Source SQL: `event-funnel-daily-breakdown`
 
-### 🧮 Comprehensive Calculation Matrix (Page 1)
+### Comprehensive Calculation Matrix (Page 1)
 
 | Metric / Calculated Field | SQL / Looker Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
 | :--- | :--- | :--- | :--- | :--- |
@@ -103,19 +103,19 @@ Tracks daily micro-conversions and step-by-step user movement down the primary e
 
 ---
 
-# 📄 Page 2: Abandonment & Leakage Analysis
+# Page 2: Abandonment & Leakage Analysis
 
 ### Objective
 Isolates financial drop-offs occurring specifically across the funnel, evaluating user conversion windows to identify true cart abandonment vs. checkout leakage.
 
-> 📌 **Data Architecture & Attribution Note:**
+> **Data Architecture & Attribution Note:**
 > * **Net Cart State Accounting:** To prevent inflated abandonment metrics, the underlying SQL computes each item's net cart volume by offsetting `remove_from_cart` events against `add_to_cart` events before evaluating lost revenue.
 > * **Stage Separation:** `Cart-Stage Lost Revenue` explicitly excludes items that progressed to `begin_checkout`, ensuring zero double-counting between mid-funnel cart drop-offs and late-stage checkout friction.
 > * **Time & Lookback Windowing:** User cart edits and purchases are evaluated within the active reporting window (recommended default: **30 Days**). This allows multi-day customer consideration journeys (e.g., carting on Monday, purchasing on Friday) to properly reconcile within the reporting period.
 
 ### Data Source SQL: `event-funnel-potential-lost-revenue`
 
-### 🧮 Comprehensive Calculation Matrix (Page 2)
+### Comprehensive Calculation Matrix (Page 2)
 
 | Metric / Calculated Field | SQL / Looker Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
 | :--- | :--- | :--- | :--- | :--- |
@@ -128,14 +128,14 @@ Isolates financial drop-offs occurring specifically across the funnel, evaluatin
 
 ---
 
-# 📄 Page 3: Inventory & Merchandising Friction
+# Page 3: Inventory & Merchandising Friction
 
 ### Objective
 Evaluates supply-chain and stock friction by diagnosing **in-stock cart abandonment** against **out-of-stock demand ceiling potential**, enabling merchandise buyers to prioritize restocks based on actual user traffic.
 
 ### Data Source SQL: `event-funnel-demand-ceiling`
 
-### 🧮 Comprehensive Calculation Matrix (Page 3)
+### Comprehensive Calculation Matrix (Page 3)
 
 | Metric / Calculated Field | SQL / Looker Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
 | :--- | :--- | :--- | :--- | :--- |
@@ -147,12 +147,12 @@ Evaluates supply-chain and stock friction by diagnosing **in-stock cart abandonm
 
 ---
 
-# 📄 Page 4: Basket Behavior & Cart Quantity Dynamics
+# Page 4: Basket Behavior & Cart Quantity Dynamics
 
 ### Objective
 Analyzes item-level quantity mutability between initial cart creation (`view_cart`) and final order completion (`purchase`), pinpointing items where shoppers expand quantities vs. items trimmed due to price thresholds.
 
-> 📌 **Data Architecture & Attribution Note:**
+> **Data Architecture & Attribution Note:**
 > * **Dynamic Basket Adjustments:** Evaluates true quantity mutability by comparing net cart additions (`add_to_cart` minus `remove_from_cart`) against completed `purchase` quantities at the item-and-date grain.
 > * **Behavior Categorization Logic:** Automatically tags user basket interactions into explicit segments:
 >   * **Quantity Expanded:** Converted unit count exceeds initial carted units (upselling/bundling success).
@@ -163,7 +163,7 @@ Analyzes item-level quantity mutability between initial cart creation (`view_car
 
 ### Data Source SQL: `event-funnel-cart-to-purchase-changes`
 
-### 🧮 Comprehensive Calculation Matrix (Page 4)
+### Comprehensive Calculation Matrix (Page 4)
 
 | Metric / Calculated Field | SQL / Looker Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
 | :--- | :--- | :--- | :--- | :--- |
