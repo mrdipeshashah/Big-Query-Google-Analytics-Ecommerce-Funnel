@@ -41,7 +41,45 @@ Before diving into page-level technical specifications, this section provides an
 * **What it is:** The sum of actual item revenue captured from completed purchase events (`event_name = 'purchase'`).
 * **Business Context:** Represents actual sales made (cash in the bank). Used across the dashboard as the baseline to evaluate "Actual Revenue vs. Potential/Lost Revenue," showing how much cash was captured compared to what was left in abandoned carts.
 
+## Multi-Day Journey Validation & Test Case
+
+To verify that the dataset accurately handles multi-session consideration cycles, stage separation, and basket trimming without double-counting, a **3-day controlled End-to-End (E2E) test** was executed using two test products (**Product A @ £50** and **Product B @ £70**).
+
+### 📋 3-Day Journey Simulation Setup
+
+| Day | User Action | Direct Event Fired | Net Cart State |
+| :--- | :--- | :--- | :--- |
+| **Day 1** | Added 2× Product A (£100) + 1× Product B (£70). Then removed 1× Product A and abandoned cart. | `add_to_cart`, `remove_from_cart` | 1× Product A + 1× Product B (£120 total) |
+| **Day 2** | Returned to site, added 1× Product B (now 2 units), initiated checkout, filled billing details, then abandoned. | `add_to_cart`, `begin_checkout` | 1× Product A + 2× Product B (£190 total) |
+| **Day 3** | Returned to checkout, trimmed Product B back to 1 unit, and completed the order. | `remove_from_cart`, `purchase` | 1× Product A + 1× Product B Purchased (£120 total) |
+
 ---
+
+### 📊 Metric Reconciliation & Analytical Insights
+
+#### **Page 2: Leakage & Stage Separation Metrics**
+
+| Metric | Recorded Value | Key Insight & Behavioral Interpretation |
+| :--- | :--- | :--- |
+| **Total Revenue** | **£120** | Captures true completed order value from Day 3 (excluding tax/shipping). |
+| **Cart-Stage Lost Revenue** | **£50** | Retains Day 1's initial abandoned cart state prior to checkout initiation. |
+| **Checkout Lost Revenue** | **£190** | Accurately isolates mid-funnel leakage when the user entered checkout on Day 2 before abandoning. |
+| **Combined Revenue Lost** | **£240** | Sums true non-converted intent across distinct historical sessions without duplicating items. |
+| **Cart Abandonment Rate** | **50%** | Reflects multi-day consideration: 1 abandoned cart interaction vs. 1 converted purchase session. |
+
+> **Why This Differs From Legacy Analytics:** Legacy setups would have counted raw cart additions, reporting **>£360+ in lost revenue** by double-counting items moved between cart and checkout stages. The updated model enforces strict stage separation.
+
+---
+
+#### **Page 4: Basket Dynamics & Quantity Shift Metrics**
+
+| Product | Cart Units | Purchased Units | Net Unit Shift | Net Value Shift | Behavior Label |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Product A** (£50) | 1 | 1 | 0 | £0 | `Unchanged` |
+| **Product B** (£70) | 2 | 1 | -1 | -£70 | `Quantity Trimmed` |
+| **OVERALL TOTAL** | **3** | **2** | **-1** | **-£70** | **Basket Trimming Detected** |
+
+> **Why This Differs From Legacy Analytics:** Traditional GA4 reports only show initial cart views vs final purchases, completely missing mid-funnel quantity edits. This model explicitly highlights **Product B as a "Quantity Trimmed" item**, surfacing price threshold sensitivity where customers scale back quantity immediately before paying.
 
 # 📄 Page 1: Conversion Funnel & Operational Performance
 
