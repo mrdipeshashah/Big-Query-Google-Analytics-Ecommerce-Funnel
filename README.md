@@ -1,7 +1,7 @@
 # OVERVIEW
 
 This repository contains Big Query code using Google Analytics raw data that will provide a summary of am end-to-end e-commerce diagnostic suite that monitors conversion leakage, basket quantity shifts, and stockout bottlenecks across the customer journey.
-It transforms raw funnel telemetry into actionable insights, helping teams recover lost revenue and optimise inventory availability
+It transforms raw funnel data into actionable insights, helping recover lost revenue and optimise inventory availability
 
 # REPOSITORY SQL SCRIPTS BREAKDOWN 
 
