@@ -3,7 +3,7 @@
 This repository contains Big Query code using Google Analytics raw data that will provide a summary of am end-to-end e-commerce diagnostic suite that monitors conversion leakage, basket quantity shifts, and stockout bottlenecks across the customer journey.
 It transforms raw funnel telemetry into actionable insights, helping teams recover lost revenue and optimise inventory availability
 
-# Repository SQL Scripts Breakdown REPOSITORY SQL SCRIPTS BREAKDOWN 
+# REPOSITORY SQL SCRIPTS BREAKDOWN 
 
 The repository consists of core SQL scripts in BigQuery organized to power a **4-page Looker Studio Analytics Dashboard**:
 
@@ -11,6 +11,10 @@ The repository consists of core SQL scripts in BigQuery organized to power a **4
 2. **`event-funnel-potential-lost-revenue`** $\rightarrow$ Powers **Page 2: Abandonment & Leakage Analysis**
 3. **`event-funnel-demand-ceiling`** $\rightarrow$ Powers **Page 3: Inventory & Merchandising Friction**
 4. **`event-funnel-cart-to-purchase-changes`** $\rightarrow$ Powers **Page 4: Basket Behavior & Cart Quantity Dynamics**
+
+# DASHBOARD
+
+The data studio dashboard (https://datastudio.google.com/reporting/acbea026-438a-48fd-818e-6ae48b7335b1) brings many of the insights to life around funnel performance
 
 ---
 
