@@ -106,7 +106,7 @@ Tracks daily micro-conversions and step-by-step user movement down the primary e
 
 # Page 2: Abandonment & Leakage Analysis
 
-### Objective
+### OBJECTIVE
 Isolates financial drop-offs occurring specifically across the funnel, evaluating user conversion windows to identify true cart abandonment vs. checkout leakage.
 
 > **Data Architecture & Attribution Note:**
@@ -129,7 +129,7 @@ Isolates financial drop-offs occurring specifically across the funnel, evaluatin
 
 # Page 3: Inventory & Merchandising Friction
 
-### Objective
+### OBJECTIVE
 Evaluates supply-chain and stock friction by diagnosing **in-stock cart abandonment** against **out-of-stock demand ceiling potential**, enabling merchandise buyers to prioritize restocks based on actual user traffic.
 
 ### Data Source SQL: `event-funnel-demand-ceiling`
@@ -146,7 +146,7 @@ Evaluates supply-chain and stock friction by diagnosing **in-stock cart abandonm
 
 # Page 4: Basket Behavior & Cart Quantity Dynamics
 
-### Objective
+### OBJECTIVE
 Analyzes item-level quantity mutability between initial cart creation (`view_cart`) and final order completion (`purchase`), pinpointing items where shoppers expand quantities vs. items trimmed due to price thresholds.
 
 > **Data Architecture & Attribution Note:**
