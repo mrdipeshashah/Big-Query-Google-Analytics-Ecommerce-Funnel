@@ -74,7 +74,7 @@ To verify that the dataset accurately handles multi-session consideration cycles
 
 > **Why This Differs From Legacy Analytics:** Legacy setups would have counted raw cart additions, reporting **>£360+ in lost revenue** by double-counting items moved between cart and checkout stages. The updated model enforces strict stage separation.
 
-#### **PAGE 4: BASKEY DYNAMICS & QUANTITY SHIFT METRICS** 
+#### **PAGE 4: BASKET DYNAMICS & QUANTITY SHIFT METRICS** 
 
 | Product | Cart Units | Purchased Units | Net Unit Shift | Net Value Shift | Behavior Label |
 | :--- | :--- | :--- | :--- | :--- | :--- |
