@@ -104,7 +104,7 @@ Tracks daily micro-conversions and step-by-step user movement down the primary e
 | **Overall Funnel Conversion Rate (%)** | `SUM(purchase_count) / NULLIF(SUM(view_item_count), 0)` | Percentage | End-to-end conversion efficiency from initial interest to final order. | Main macro efficiency KPI for ecommerce operations and growth marketing. |
 | **Macro Drop-Off Rate (%)** | `1 - (SUM(purchase_count) / NULLIF(SUM(view_item_count), 0))` | Percentage | Complement of the overall funnel conversion rate. | Quantifies the total share of site visitors lost across all funnel stages. |
 
-# Page 2: Abandonment & Leakage Analysis
+# PAGE 2: ABANDONMENT & LEAKAGE ANALYSIS
 
 ### OBJECTIVE
 Isolates financial drop-offs occurring specifically across the funnel, evaluating user conversion windows to identify true cart abandonment vs. checkout leakage.
@@ -127,7 +127,7 @@ Isolates financial drop-offs occurring specifically across the funnel, evaluatin
 | **Cart Abandonment Rate (%)** | `(SUM(cart_users) - SUM(purchasing_users)) / NULLIF(SUM(cart_users), 0)` | Percentage | Unique users who viewed/added to cart minus users who completed purchase, divided by cart users. | Standard ecommerce abandonment metric measuring overall basket drop-off. |
 | **Checkout Abandonment Rate (%)** | `(SUM(checkout_users) - SUM(purchasing_users)) / NULLIF(SUM(checkout_users), 0)` | Percentage | Unique users who reached checkout minus actual buyers, divided by checkout starters. | Highlights critical friction occurring exclusively inside the checkout funnel. |
 
-# Page 3: Inventory & Merchandising Friction
+# PAGE 3: INVENTORY & MERCHANDISING FRICTION 
 
 ### OBJECTIVE
 Evaluates supply-chain and stock friction by diagnosing **in-stock cart abandonment** against **out-of-stock demand ceiling potential**, enabling merchandise buyers to prioritize restocks based on actual user traffic.
@@ -144,7 +144,7 @@ Evaluates supply-chain and stock friction by diagnosing **in-stock cart abandonm
 | **Abandoned Units** | `GREATEST(0, add_to_cart_count - purchase_count)` | Integer | Subtracts converted units from total carted units per item/date grain. | Physical unit count added to cart but left unpurchased. |
 | **Cart Abandonment Rate %** | `SUM(Abandoned Units) / NULLIF(SUM(add_to_cart_count), 0)` | Percentage | Ratio of unpurchased carted items against total cart additions. | Item-level friction metric identifying products with high cart drop-off rates. |
 
-# Page 4: Basket Behavior & Cart Quantity Dynamics
+# PAGE 4: BASKET BEHAVIOUR & CART QUANTITY
 
 ### OBJECTIVE
 Analyzes item-level quantity mutability between initial cart creation (`view_cart`) and final order completion (`purchase`), pinpointing items where shoppers expand quantities vs. items trimmed due to price thresholds.
