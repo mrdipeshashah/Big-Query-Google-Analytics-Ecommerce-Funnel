@@ -16,9 +16,7 @@ The repository consists of core SQL scripts in BigQuery organized to power a **4
 
 The data studio dashboard (https://datastudio.google.com/reporting/acbea026-438a-48fd-818e-6ae48b7335b1) brings many of the insights to life around funnel performance
 
----
-
-# Key Metrics Overview & Executive Context
+# KEY METRICS OVERVIEW 
 
 Before diving into page-level technical specifications, this section provides an immediate reference for the core financial and conversion metrics tracked across the analytics suite:
 
@@ -50,11 +48,11 @@ Before diving into page-level technical specifications, this section provides an
 * **What it is:** The sum of actual item revenue captured from completed purchase events (`event_name = 'purchase'`).
 * **Business Context:** Represents actual sales made (cash in the bank). Used across the dashboard as the baseline to evaluate "Actual Revenue vs. Potential/Lost Revenue," showing how much cash was captured compared to what was left in abandoned carts.
 
-## Multi-Day Journey Validation & Test Case
+## MULTI DAY JOURNEY VALIDATION & TEST CASE 
 
 To verify that the dataset accurately handles multi-session consideration cycles, stage separation, and basket trimming without double-counting, a **3-day controlled End-to-End (E2E) test** was executed using two test products (**Product A @ £50** and **Product B @ £70**).
 
-### 📋 3-Day Journey Simulation Setup
+### 3-DAY JOURNEY TEST CASE 
 
 | Day | User Action | Direct Event Fired | Net Cart State |
 | :--- | :--- | :--- | :--- |
@@ -62,11 +60,9 @@ To verify that the dataset accurately handles multi-session consideration cycles
 | **Day 2** | Returned to site, added 1× Product B (now 2 units), initiated checkout, filled billing details, then abandoned. | `add_to_cart`, `begin_checkout` | 1× Product A + 2× Product B (£190 total) |
 | **Day 3** | Returned to checkout, trimmed Product B back to 1 unit, and completed the order. | `remove_from_cart`, `purchase` | 1× Product A + 1× Product B Purchased (£120 total) |
 
----
+### METRIC RECONCILIATION & ANALYTICAL INSIGHTS
 
-### Metric Reconciliation & Analytical Insights
-
-#### **Page 2: Leakage & Stage Separation Metrics**
+#### **PAGE 2: LEAKAGE & STAGE SEPARATION METRICS** 
 
 | Metric | Recorded Value | Key Insight & Behavioral Interpretation |
 | :--- | :--- | :--- |
@@ -78,9 +74,7 @@ To verify that the dataset accurately handles multi-session consideration cycles
 
 > **Why This Differs From Legacy Analytics:** Legacy setups would have counted raw cart additions, reporting **>£360+ in lost revenue** by double-counting items moved between cart and checkout stages. The updated model enforces strict stage separation.
 
----
-
-#### **Page 4: Basket Dynamics & Quantity Shift Metrics**
+#### **PAGE 4: BASKEY DYNAMICS & QUANTITY SHIFT METRICS** 
 
 | Product | Cart Units | Purchased Units | Net Unit Shift | Net Value Shift | Behavior Label |
 | :--- | :--- | :--- | :--- | :--- | :--- |
@@ -110,8 +104,6 @@ Tracks daily micro-conversions and step-by-step user movement down the primary e
 | **Overall Funnel Conversion Rate (%)** | `SUM(purchase_count) / NULLIF(SUM(view_item_count), 0)` | Percentage | End-to-end conversion efficiency from initial interest to final order. | Main macro efficiency KPI for ecommerce operations and growth marketing. |
 | **Macro Drop-Off Rate (%)** | `1 - (SUM(purchase_count) / NULLIF(SUM(view_item_count), 0))` | Percentage | Complement of the overall funnel conversion rate. | Quantifies the total share of site visitors lost across all funnel stages. |
 
----
-
 # Page 2: Abandonment & Leakage Analysis
 
 ### Objective
@@ -135,8 +127,6 @@ Isolates financial drop-offs occurring specifically across the funnel, evaluatin
 | **Cart Abandonment Rate (%)** | `(SUM(cart_users) - SUM(purchasing_users)) / NULLIF(SUM(cart_users), 0)` | Percentage | Unique users who viewed/added to cart minus users who completed purchase, divided by cart users. | Standard ecommerce abandonment metric measuring overall basket drop-off. |
 | **Checkout Abandonment Rate (%)** | `(SUM(checkout_users) - SUM(purchasing_users)) / NULLIF(SUM(checkout_users), 0)` | Percentage | Unique users who reached checkout minus actual buyers, divided by checkout starters. | Highlights critical friction occurring exclusively inside the checkout funnel. |
 
----
-
 # Page 3: Inventory & Merchandising Friction
 
 ### Objective
@@ -153,8 +143,6 @@ Evaluates supply-chain and stock friction by diagnosing **in-stock cart abandonm
 | **Actual Revenue** | `SUM(IF(event_name = 'purchase', item_revenue, 0))` | Currency (`£`) | Sum of completed order item revenue captured during the selected period. | Actual sales baseline used to compare realized dollars against lost cart potential. |
 | **Abandoned Units** | `GREATEST(0, add_to_cart_count - purchase_count)` | Integer | Subtracts converted units from total carted units per item/date grain. | Physical unit count added to cart but left unpurchased. |
 | **Cart Abandonment Rate %** | `SUM(Abandoned Units) / NULLIF(SUM(add_to_cart_count), 0)` | Percentage | Ratio of unpurchased carted items against total cart additions. | Item-level friction metric identifying products with high cart drop-off rates. |
-
----
 
 # Page 4: Basket Behavior & Cart Quantity Dynamics
 
