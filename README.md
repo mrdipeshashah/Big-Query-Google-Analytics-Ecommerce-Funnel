@@ -94,7 +94,7 @@ Tracks daily micro-conversions and step-by-step user movement down the primary e
 
 ### COMPREHENSIVE CALCULATION MATRIX (PAGE 1)
 
-| Metric / Calculated Field | SQL / Looker Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
+| Metric / Calculated Field | Data Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
 | :--- | :--- | :--- | :--- | :--- |
 | **Total Event Volume** | `COUNT(event_name)` | Integer | Raw count of all captured funnel events within the selected date window. | High-level traffic and interaction pulse across the site. |
 | **Unique Funnel Users** | `COUNT(DISTINCT user_pseudo_id)` | Integer | Count of unique client IDs completing at least one funnel action. | Evaluates actual user reach rather than repeat event spam. |
@@ -118,7 +118,7 @@ Isolates financial drop-offs occurring specifically across the funnel, evaluatin
 
 ### COMPREHENSIVE CALCULATION MATRIX (PAGE 2)
 
-| Metric / Calculated Field | SQL / Looker Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
+| Metric / Calculated Field | Data Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
 | :--- | :--- | :--- | :--- | :--- |
 | **Combined Revenue Lost (£)** | `SUM(gross_lost_revenue) + SUM(checkout_lost_revenue)` | Currency (`£`) | Sum of all potential monetary leakage across both cart and checkout stages. | **Macro Opportunity Size:** Top-line financial pipeline lost prior to purchase completion. |
 | **Cart-Stage Lost Revenue (£)** | `SUM(cart_units * item_price) WHERE event_name = 'view_cart' AND user_id NOT IN (purchasers)` | Currency (`£`) | Sum of full item potential value present in carts that never reached checkout. | Represents early-stage drop-off (product hesitation, early shipping/fee concerns, or lack of cart-saver emails). |
@@ -136,7 +136,7 @@ Evaluates supply-chain and stock friction by diagnosing **in-stock cart abandonm
 
 ### COMPREHENSIVE CALCULATION MATRIX (PAGE 3)
 
-| Metric / Calculated Field | SQL / Looker Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
+| Metric / Calculated Field | Data Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
 | :--- | :--- | :--- | :--- | :--- |
 | **Gross Lost Revenue (In-Stock)** | `SUM(IF(stock_status != 'outofstock', Abandoned Units * price, 0))` | Currency (`£`) | Total abandoned cart value exclusively for products currently in stock. | High-intent cart leakage that can be directly recovered via CRO/email flows. |
 | **Unmet Demand Ceiling (Out-of-Stock)** | `SUM(IF(stock_status = 'outofstock', pdp_views * price, 0))` | Currency (`£`) | Total item value exposure across all PDP views on out-of-stock items (`Views × Price`). | Top-of-funnel merchandising ceiling indicating lost revenue potential due to stockouts. |
@@ -162,7 +162,7 @@ Analyzes item-level quantity mutability between initial cart creation (`view_car
 
 ### COMPREHENSIVE CALCULATION MATRIX (PAGE 4)
 
-| Metric / Calculated Field | SQL / Looker Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
+| Metric / Calculated Field | Data Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
 | :--- | :--- | :--- | :--- | :--- |
 | **Initial Cart Volume (`cart_units`)** | `SUM(c.cart_units)` | Integer | Total units aggregated from `view_cart` events grouped by `item_id` and date. | Total physical unit volume initially intended for purchase by customers. |
 | **Purchased Volume (`purchased_units`)** | `SUM(p.purchased_units)` | Integer | Total units aggregated from `purchase` events grouped by `item_id` and date. | Total physical unit volume successfully converted into actual sales. |
