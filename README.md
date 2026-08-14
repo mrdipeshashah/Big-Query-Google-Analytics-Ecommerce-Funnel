@@ -46,11 +46,11 @@ Before diving into page-level technical specifications, this section provides an
 
 ### 7. Actual Revenue (£)
 * **What it is:** The sum of actual item revenue captured from completed purchase events (`event_name = 'purchase'`).
-* **Business Context:** Represents actual sales made (cash in the bank). Used across the dashboard as the baseline to evaluate "Actual Revenue vs. Potential/Lost Revenue," showing how much cash was captured compared to what was left in abandoned carts.
+* **Business Context:** Represents actual sales made (cash in the bank). Used across the dashboard as the baseline to evaluate "Actual Revenue vs. Potential/Lost Revenue," showing how much cash was captured compared to what was left in abandoned carts
 
 ## MULTI DAY JOURNEY VALIDATION & TEST CASE 
 
-To verify that the dataset accurately handles multi-session consideration cycles, stage separation, and basket trimming without double-counting, a **3-day controlled End-to-End (E2E) test** was executed using two test products (**Product A @ £50** and **Product B @ £70**).
+To verify that the dataset accurately handles multi-session consideration cycles, stage separation, and basket trimming without double-counting, a **3-day controlled End-to-End (E2E) test** was executed using two test products (**Product A @ £50** and **Product B @ £70**)
 
 ### 3-DAY JOURNEY TEST CASE 
 
@@ -72,7 +72,7 @@ To verify that the dataset accurately handles multi-session consideration cycles
 | **Combined Revenue Lost** | **£240** | Sums true non-converted intent across distinct historical sessions without duplicating items. |
 | **Cart Abandonment Rate** | **50%** | Reflects multi-day consideration: 1 abandoned cart interaction vs. 1 converted purchase session. |
 
-> **Why This Differs From Legacy Analytics:** Legacy setups would have counted raw cart additions, reporting **>£360+ in lost revenue** by double-counting items moved between cart and checkout stages. The updated model enforces strict stage separation.
+> **Why This Differs From Legacy Analytics:** Legacy setups would have counted raw cart additions, reporting **>£360+ in lost revenue** by double-counting items moved between cart and checkout stages. The updated model enforces strict stage separation
 
 #### **PAGE 4: BASKET DYNAMICS & QUANTITY SHIFT METRICS** 
 
@@ -82,17 +82,17 @@ To verify that the dataset accurately handles multi-session consideration cycles
 | **Product B** (£70) | 2 | 1 | -1 | -£70 | `Quantity Trimmed` |
 | **OVERALL TOTAL** | **3** | **2** | **-1** | **-£70** | **Basket Trimming Detected** |
 
-> **Why This Differs From Legacy Analytics:** Traditional GA4 reports only show initial cart views vs final purchases, completely missing mid-funnel quantity edits. This model explicitly highlights **Product B as a "Quantity Trimmed" item**, surfacing price threshold sensitivity where customers scale back quantity immediately before paying.
+> **Why This Differs From Legacy Analytics:** Traditional GA4 reports only show initial cart views vs final purchases, completely missing mid-funnel quantity edits. This model explicitly highlights **Product B as a "Quantity Trimmed" item**
 
-# Page 1: Conversion Funnel & Operational Performance
+# PAGE 1: CONVERSION FUNNEL & OPERATIONAL PERFORMANCE 
 
-### Objective
+### OBJECTIVE
 Tracks daily micro-conversions and step-by-step user movement down the primary ecommerce purchasing funnel:
 `Item View` $\rightarrow$ `Add to Cart` $\rightarrow$ `View Cart` $\rightarrow$ `Begin Checkout` $\rightarrow$ `Purchase`.
 
 ### Data Source SQL: `event-funnel-daily-breakdown`
 
-### Comprehensive Calculation Matrix (Page 1)
+### COMPREHENSIVE CALCULATION MATRIX (PAGE 1)
 
 | Metric / Calculated Field | SQL / Looker Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
 | :--- | :--- | :--- | :--- | :--- |
@@ -116,7 +116,7 @@ Isolates financial drop-offs occurring specifically across the funnel, evaluatin
 
 ### Data Source SQL: `event-funnel-potential-lost-revenue`
 
-### Comprehensive Calculation Matrix (Page 2)
+### COMPREHENSIVE CALCULATION MATRIX (PAGE 2)
 
 | Metric / Calculated Field | SQL / Looker Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
 | :--- | :--- | :--- | :--- | :--- |
@@ -134,7 +134,7 @@ Evaluates supply-chain and stock friction by diagnosing **in-stock cart abandonm
 
 ### Data Source SQL: `event-funnel-demand-ceiling`
 
-### Comprehensive Calculation Matrix (Page 3)
+### COMPREHENSIVE CALCULATION MATRIX (PAGE 3)
 
 | Metric / Calculated Field | SQL / Looker Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
 | :--- | :--- | :--- | :--- | :--- |
@@ -160,7 +160,7 @@ Analyzes item-level quantity mutability between initial cart creation (`view_car
 
 ### Data Source SQL: `event-funnel-cart-to-purchase-changes`
 
-### Comprehensive Calculation Matrix (Page 4)
+### COMPREHENSIVE CALCULATION MATRIX (PAGE 4)
 
 | Metric / Calculated Field | SQL / Looker Studio Formula | Type / Format | Technical Explanation & Logic | Business Meaning & Diagnostic Value |
 | :--- | :--- | :--- | :--- | :--- |
