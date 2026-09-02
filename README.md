@@ -50,7 +50,7 @@ Before diving into page-level technical specifications, this section provides an
 
 ## MULTI DAY JOURNEY VALIDATION & TEST CASE 
 
-To verify that the dataset accurately handles multi-session consideration cycles, stage separation, and basket trimming without double-counting, a **3-day controlled End-to-End (E2E) test** was executed using two test products (**Product A @ £50** and **Product B @ £70**)
+To verify that the dataset accurately handles multi-session consideration cycles, stage separation, and basket trimming without double-counting, a **3-day controlled end-to-end test** was executed using two test products (**Product A @ £50** and **Product B @ £70**)
 
 ### 3-DAY JOURNEY TEST CASE 
 
@@ -72,8 +72,6 @@ To verify that the dataset accurately handles multi-session consideration cycles
 | **Combined Revenue Lost** | **£240** | Sums true non-converted intent across distinct historical sessions without duplicating items. |
 | **Cart Abandonment Rate** | **50%** | Reflects multi-day consideration: 1 abandoned cart interaction vs. 1 converted purchase session. |
 
-> **Why This Differs From Legacy Analytics:** Legacy setups would have counted raw cart additions, reporting **>£360+ in lost revenue** by double-counting items moved between cart and checkout stages. The updated model enforces strict stage separation
-
 #### **PAGE 4: BASKET DYNAMICS & QUANTITY SHIFT METRICS** 
 
 | Product | Cart Units | Purchased Units | Net Unit Shift | Net Value Shift | Behavior Label |
@@ -81,8 +79,6 @@ To verify that the dataset accurately handles multi-session consideration cycles
 | **Product A** (£50) | 1 | 1 | 0 | £0 | `Unchanged` |
 | **Product B** (£70) | 2 | 1 | -1 | -£70 | `Quantity Trimmed` |
 | **OVERALL TOTAL** | **3** | **2** | **-1** | **-£70** | **Basket Trimming Detected** |
-
-> **Why This Differs From Legacy Analytics:** Traditional GA4 reports only show initial cart views vs final purchases, completely missing mid-funnel quantity edits. This model explicitly highlights **Product B as a "Quantity Trimmed" item**
 
 # PAGE 1: CONVERSION FUNNEL & OPERATIONAL PERFORMANCE 
 
