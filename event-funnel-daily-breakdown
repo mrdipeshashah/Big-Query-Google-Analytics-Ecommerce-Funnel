@@ -36,7 +36,7 @@ SELECT
   SUM(COALESCE(i.quantity, 1)) AS total_quantity,
   SUM(COALESCE(i.item_revenue, 0)) AS total_revenue
 
-FROM `mrdipeshashah.analytics_343520795.events_*`, 
+FROM `enter.tablename_123456.events_*`, 
 UNNEST(items) AS i
 
 WHERE _TABLE_SUFFIX BETWEEN '20260101' AND '20260731'
