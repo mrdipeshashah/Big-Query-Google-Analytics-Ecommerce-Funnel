@@ -14,7 +14,7 @@ WITH cart_intent_items AS (
       SUM(IF(event_name = 'add_to_cart', COALESCE(i.quantity, 1), 0)) - 
       SUM(IF(event_name = 'remove_from_cart', COALESCE(i.quantity, 1), 0))
     ) * MAX(i.price) AS cart_value
-  FROM `mrdipeshashah.analytics_343520795.events_*`,
+  FROM `enter.tablename_123456.events_*`,
   UNNEST(items) AS i
   WHERE event_name IN ('add_to_cart', 'remove_from_cart', 'view_cart')
   GROUP BY 1, 2, 3, 4
