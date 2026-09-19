@@ -7,7 +7,7 @@ WITH prepped_events AS (
     COALESCE(i.price, 0) AS price,
     COALESCE(i.item_revenue, 0) AS item_revenue,
     (SELECT value.string_value FROM UNNEST(i.item_params) WHERE key = 'stockstatus') AS stock_status
-  FROM `mrdipeshashah.analytics_343520795.events_*`,
+  FROM `enter.tablename_123456.events_*`,
   UNNEST(items) AS i
   WHERE _TABLE_SUFFIX BETWEEN '20260101' AND '20260831'
     AND event_name IN ('view_item', 'add_to_cart', 'purchase')
