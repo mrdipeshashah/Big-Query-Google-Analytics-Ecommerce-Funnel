@@ -24,7 +24,7 @@ WITH item_events AS (
     SUM(IF(event_name = 'purchase', COALESCE(i.quantity, 1), 0)) AS purchased_units,
     SUM(COALESCE(i.item_revenue, 0)) AS total_revenue
 
-  FROM `mrdipeshashah.analytics_343520795.events_*`,
+  FROM `enter.tablename_123456.events_*`,
   UNNEST(items) AS i
   WHERE event_name IN ('view_item', 'add_to_cart', 'remove_from_cart', 'begin_checkout', 'purchase')
   GROUP BY 1, 2, 3, 4, 5, 6, 7, 8, 9
