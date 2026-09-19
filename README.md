@@ -7,10 +7,10 @@ It transforms raw funnel data into actionable insights, helping recover lost rev
 
 The repository consists of core SQL scripts in BigQuery organized to power a **4-page Looker Studio Analytics Dashboard**:
 
-1. **`event-funnel-daily-breakdown`** $\rightarrow$ Powers **Page 1: Conversion Funnel & Operational Performance**
-2. **`event-funnel-potential-lost-revenue`** $\rightarrow$ Powers **Page 2: Abandonment & Leakage Analysis**
-3. **`event-funnel-demand-ceiling`** $\rightarrow$ Powers **Page 3: Inventory & Merchandising Friction**
-4. **`event-funnel-cart-to-purchase-changes`** $\rightarrow$ Powers **Page 4: Basket Behavior & Cart Quantity Dynamics**
+1. **`1.1_event-funnel-daily-breakdown`** $\rightarrow$ Powers **Page 1: Conversion Funnel & Operational Performance**
+2. **`1.3_event-funnel-potential-lost-revenue`** $\rightarrow$ Powers **Page 2: Abandonment & Leakage Analysis**
+3. **`1.2_event-funnel-demand-ceiling`** $\rightarrow$ Powers **Page 3: Inventory & Merchandising Friction**
+4. **`1.4_event-funnel-cart-to-purchase-changes`** $\rightarrow$ Powers **Page 4: Basket Behavior & Cart Quantity Dynamics**
 
 # DASHBOARD
 
@@ -86,7 +86,7 @@ To verify that the dataset accurately handles multi-session consideration cycles
 Tracks daily micro-conversions and step-by-step user movement down the primary ecommerce purchasing funnel:
 `Item View` $\rightarrow$ `Add to Cart` $\rightarrow$ `View Cart` $\rightarrow$ `Begin Checkout` $\rightarrow$ `Purchase`.
 
-### Data Source SQL: `event-funnel-daily-breakdown`
+### Data Source SQL: `1.1_event-funnel-daily-breakdown`
 
 ### COMPREHENSIVE CALCULATION MATRIX (PAGE 1)
 
@@ -110,7 +110,7 @@ Isolates financial drop-offs occurring specifically across the funnel, evaluatin
 > * **Stage Separation:** `Cart-Stage Lost Revenue` explicitly excludes items that progressed to `begin_checkout`, ensuring zero double-counting between mid-funnel cart drop-offs and late-stage checkout friction.
 > * **Time & Lookback Windowing:** User cart edits and purchases are evaluated within the active reporting window (recommended default: **30 Days**). This allows multi-day customer consideration journeys (e.g., carting on Monday, purchasing on Friday) to properly reconcile within the reporting period.
 
-### Data Source SQL: `event-funnel-potential-lost-revenue`
+### Data Source SQL: `1.3_event-funnel-potential-lost-revenue`
 
 ### COMPREHENSIVE CALCULATION MATRIX (PAGE 2)
 
@@ -128,7 +128,7 @@ Isolates financial drop-offs occurring specifically across the funnel, evaluatin
 ### OBJECTIVE
 Evaluates supply-chain and stock friction by diagnosing **in-stock cart abandonment** against **out-of-stock demand ceiling potential**, enabling merchandise buyers to prioritize restocks based on actual user traffic.
 
-### Data Source SQL: `event-funnel-demand-ceiling`
+### Data Source SQL: `1.2_event-funnel-demand-ceiling`
 
 ### COMPREHENSIVE CALCULATION MATRIX (PAGE 3)
 
@@ -154,7 +154,7 @@ Analyzes item-level quantity mutability between initial cart creation (`view_car
 >   * **Unchanged:** Perfect 1:1 unit retention from cart to purchase.
 > * **Attribution Horizon:** Captures quantity shifts across multi-session shopping journeys, eliminating false "negative expansion" spikes caused by unadjusted cart views.
 
-### Data Source SQL: `event-funnel-cart-to-purchase-changes`
+### Data Source SQL: `1.4_event-funnel-cart-to-purchase-changes`
 
 ### COMPREHENSIVE CALCULATION MATRIX (PAGE 4)
 
